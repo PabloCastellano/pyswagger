@@ -10,7 +10,7 @@ class Client(BaseClient):
 
     __schemes__ = set(['http', 'https'])
 
-    def __init__(self, auth=None, send_opt=None):
+    def __init__(self, auth=None, send_opt=None, session=None):
         """ constructor
 
         :param auth pyswagger.SwaggerAuth: auth info used when requesting
@@ -20,7 +20,10 @@ class Client(BaseClient):
         if send_opt is None:
             send_opt = {}
 
-        self.__s = Session()
+        if session is None:
+            self.__s = Session()
+        else:
+            self.__s = session
         self.__send_opt = send_opt
 
     def request(self, req_and_resp, opt=None, headers=None):
@@ -66,8 +69,7 @@ class Client(BaseClient):
             files=file_obj
         )
         rq = self.__s.prepare_request(rq)
-        rs = self.__s.send(rq, stream=True, **self.__send_opt)
-        self.__s.close()
+        rs = self.__s.send(rq, stream=False, **self.__send_opt)
 
         resp.apply_with(
             status=rs.status_code,
